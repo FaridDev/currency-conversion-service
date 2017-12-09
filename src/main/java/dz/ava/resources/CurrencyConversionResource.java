@@ -1,6 +1,8 @@
 package dz.ava.resources;
 
 import dz.ava.bean.CurrencyConversionBean;
+import dz.ava.feign.CurrencyExchangeServiceProxy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +15,10 @@ import java.util.Map;
 
 @RestController
 public class CurrencyConversionResource {
+
+
+    @Autowired
+    private CurrencyExchangeServiceProxy currencyExchangeServiceProxy;
 
     @GetMapping("/currency-conversion/from/{from}/to/{to}/quantity/{quantity}")
     public CurrencyConversionBean convertCurrency(@PathVariable String from,
@@ -30,6 +36,20 @@ public class CurrencyConversionResource {
                 uriVariables);
 
         CurrencyConversionBean currencyConversionBean = responseEntity.getBody();
+
+        return new CurrencyConversionBean(currencyConversionBean.getId(),
+                from, to,
+                currencyConversionBean.getConversionMultiple(), quantity,
+                quantity.multiply(currencyConversionBean.getConversionMultiple()),
+                currencyConversionBean.getPort());
+    }
+
+    @GetMapping("/currency-conversion-feign/from/{from}/to/{to}/quantity/{quantity}")
+    public CurrencyConversionBean convertCurrencyFeign(@PathVariable String from,
+                                                  @PathVariable String to,
+                                                  @PathVariable BigDecimal quantity) {
+
+        CurrencyConversionBean currencyConversionBean = currencyExchangeServiceProxy.retrieveExchangeValue(from, to);
 
         return new CurrencyConversionBean(currencyConversionBean.getId(),
                 from, to,
