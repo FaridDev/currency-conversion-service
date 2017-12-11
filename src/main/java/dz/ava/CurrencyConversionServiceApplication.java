@@ -18,7 +18,7 @@ public class CurrencyConversionServiceApplication {
 	}
 
     @Bean
-    public AlwaysSampler defaultSampler(){
+    public AlwaysSampler alwaysSampler(){
         return new AlwaysSampler();
     }
 }
